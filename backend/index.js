@@ -15,7 +15,6 @@ app.use(express.json())
 // connect database
 connectDB();
 
-
 app.get("/", (req, res)=>{
     return res.status(200).send("<h>Hello </h>")
 });
