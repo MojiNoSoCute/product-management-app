@@ -9,6 +9,9 @@ const createProduct = async (req, res, next) => {
         .json({ message: "Name and Price are requied fields" });
     }
     const newProduct = await Product.create({
+      // มีค่า เท่ากับ name: name ,
+      // des: des,
+      // image: image
       name,
       price: Number(price),
       description,
@@ -32,18 +35,16 @@ const getAllProduct = async (req, res, next) => {
 
 const getProductById = async (req, res, next) => {
   try {
-    // แปลง id จาก string เป็น number
-    const productId = Number(req.params.id);
-
-    // ค้นหา product ที่มี id ตรงกับที่ขอมา await ให้รอทำให้เสร็จก่อน
-    const product = await Product.findByPk(productId);
-
-    // ถ้าไม่เจอ ให้ตอบกลับ 404 และ return ออกจาก function เลย
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Product id is required!" });
     }
+    const product = await Product.findByPk(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found!" });
+    }
+    return res.status(200).json(product);
 
-    // ถ้าเจอ ส่งข้อมูลกลับไป
     return res.status(200).json(product);
   } catch (error) {
     return next(error);
@@ -52,28 +53,28 @@ const getProductById = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   try {
-    // แปลง id จาก string เป็น number
-    const productId = Number(req.params.id);
-
-    // รับค่าใหม่จาก body (จะส่งมาแค่บางฟิลด์ก็ได้)
-    const { name, price } = req.body;
-
-    // หา product ที่จะแก้ไขก่อน
-    const product = await Product.findByPk(productId);
-
-    // ถ้าไม่เจอส่ง 404
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Product id is required!" });
+    }
+    const { name, price, description, image } = req.body;
+    if (!name || !price) {
+      return res.status(400).json({ message: "Name and Price can't be null" });
     }
 
-    // อัปเดตค่า ถ้าไม่ส่งมาให้ใช้ค่าเดิม
-    product.name = name || product.name;
-    product.price = price ? Number(price) : product.price;
+    const product = await Product.findByPk(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found!" });
+    }
+    const updates = {};
+    //ให้แก้ได้บางค่า และทุกค่า
+    if (name != undefined) update.name = name;
+    if (price != undefined) update.price = Number(price);
+    if (description != undefined) update.description = description;
+    if (image != undefined) update.image = image;
 
-    // บันทึกลง database จริง
-    await product.save();
-
-    return res.status(200).json({ message: "Product updated", data: product });
+    await product.update(updates);
+    return res.status(200).json(product);
   } catch (error) {
     return next(error);
   }
@@ -81,21 +82,20 @@ const updateProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   try {
-    // แปลง id จาก string เป็น number
-    const productId = Number(req.params.id);
-
-    // หา product ที่จะลบก่อน
-    const product = await Product.findByPk(productId);
-
-    // ถ้าไม่เจอส่ง 404
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Product id is required!" });
+    }
+    const product = await Product.findByPk(id);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Product not found!" });
     }
 
-    // ลบออกจาก database จริง
     await product.destroy();
 
-    return res.status(200).json({ message: "Product deleted", data: product });
+    return res
+      .status(200)
+      .json({ message: "Product deleted", deleteProduct: product });
   } catch (error) {
     return next(error);
   }
