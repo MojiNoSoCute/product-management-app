@@ -3,19 +3,17 @@ import Product from "../model/productModel.js";
 const createProduct = async (req, res, next) => {
   try {
     const { name, price, description, image } = req.body;
-    if (!name || !price) {
-      return res
-        .status(400)
-        .json({ message: "Name and Price are requied fields" });
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "กรุณาระบุชื่อสินค้า" });
+    }
+    if (price === undefined || price === null || price === "" || isNaN(Number(price)) || Number(price) < 0) {
+      return res.status(400).json({ message: "กรุณาระบุราคาที่ถูกต้องและไม่ติดลบ" });
     }
     const newProduct = await Product.create({
-      // มีค่า เท่ากับ name: name ,
-      // des: des,
-      // image: image
-      name,
+      name: name.trim(),
       price: Number(price),
-      description,
-      image,
+      description: description ? description.trim() : "",
+      image: image ? image.trim() : "",
     });
     return res.status(201).json(newProduct);
   } catch (error) {
@@ -25,7 +23,9 @@ const createProduct = async (req, res, next) => {
 
 const getAllProduct = async (req, res, next) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({
+      order: [["id", "ASC"]],
+    });
 
     return res.status(200).json(products);
   } catch (error) {
@@ -56,8 +56,11 @@ const updateProduct = async (req, res, next) => {
       return res.status(400).json({ message: "Product id is required!" });
     }
     const { name, price, description, image } = req.body;
-    if (!name || !price) {
-      return res.status(400).json({ message: "Name and Price can't be null" });
+    if (name !== undefined && !name.trim()) {
+      return res.status(400).json({ message: "ชื่อสินค้าต้องไม่เป็นค่าว่าง" });
+    }
+    if (price !== undefined && (price === "" || isNaN(Number(price)) || Number(price) < 0)) {
+      return res.status(400).json({ message: "ราคาต้องเป็นตัวเลขที่ถูกต้องและไม่ติดลบ" });
     }
 
     const product = await Product.findByPk(id);
@@ -65,11 +68,10 @@ const updateProduct = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found!" });
     }
     const updates = {};
-    //ให้แก้ได้บางค่า และทุกค่า
-    if (name != undefined) updates.name = name;
-    if (price != undefined) updates.price = Number(price);
-    if (description != undefined) updates.description = description;
-    if (image != undefined) updates.image = image;
+    if (name !== undefined) updates.name = name.trim();
+    if (price !== undefined) updates.price = Number(price);
+    if (description !== undefined) updates.description = description ? description.trim() : "";
+    if (image !== undefined) updates.image = image ? image.trim() : "";
 
     await product.update(updates);
     return res.status(200).json(product);

@@ -35,7 +35,30 @@ const EditProductPage = () => {
   };
 
   useEffect(() => {
-    fetchProduct();
+    let ignore = false;
+    getProduct(id)
+      .then((data) => {
+        if (!ignore) {
+          setName(data.name || "");
+          setPrice(data.price ?? "");
+          setDescription(data.description || "");
+          setImage(data.image || "");
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err.message || "ไม่สามารถดึงข้อมูลสินค้าได้");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   const handleSubmit = async (e) => {

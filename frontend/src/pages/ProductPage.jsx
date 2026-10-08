@@ -9,7 +9,7 @@ import { confirmDelete, showError, showSuccess } from "../services/alertService"
 const ProductPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const loadProducts = async () => {
@@ -26,7 +26,21 @@ const ProductPage = () => {
   };
 
   useEffect(() => {
-    loadProducts();
+    let ignore = false;
+    getProducts()
+      .then((data) => {
+        if (!ignore) setProducts(data);
+      })
+      .catch((err) => {
+        if (!ignore) setError(err.message || "ไม่สามารถโหลดข้อมูลสินค้าได้");
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleDelete = async (id) => {
