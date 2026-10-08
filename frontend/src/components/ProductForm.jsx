@@ -1,4 +1,39 @@
-import { Pencil, PlusCircle, X } from "lucide-react";
+import { useState } from "react";
+import {
+  Pencil,
+  PlusCircle,
+  X,
+  Image,
+  Tag,
+  DollarSign,
+  FileText,
+  ImageOff,
+  Sparkles,
+} from "lucide-react";
+
+// Preset sample images for quick testing
+const PRESET_IMAGES = [
+  {
+    name: "MacBook",
+    url: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "Keyboard",
+    url: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "Headphones",
+    url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "Smartwatch",
+    url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "Camera",
+    url: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80",
+  },
+];
 
 function ProductForm({
   editingId,
@@ -14,103 +49,225 @@ function ProductForm({
   onSubmit,
   onCancel,
 }) {
+  const [imagePreviewError, setImagePreviewError] = useState(false);
+
   return (
-    <section className="card border border-base-300 bg-base-100 shadow-sm">
-      <div className="card-body p-5 sm:p-6">
-        <div className="mb-2 flex items-center gap-3">
-          <div className="rounded-xl bg-primary/10 p-2 text-primary">
-            {editingId ? <Pencil className="size-5" /> : <PlusCircle className="size-5" />}
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      {/* Form Card (2 Columns on large screens) */}
+      <section className="card border border-base-300 bg-base-100 shadow-sm lg:col-span-2">
+        <div className="card-body p-5 sm:p-7">
+          {/* Header */}
+          <div className="mb-4 flex items-center gap-3 border-b border-base-200 pb-4">
+            <div
+              className={`grid size-12 place-items-center rounded-2xl ${
+                editingId ? "bg-warning/15 text-warning" : "bg-primary/15 text-primary"
+              }`}
+            >
+              {editingId ? <Pencil className="size-6" /> : <PlusCircle className="size-6" />}
+            </div>
+            <div>
+              <h2 className="card-title text-xl font-bold">
+                {editingId ? "แก้ไขข้อมูลสินค้า" : "เพิ่มสินค้าใหม่เข้าสู่ระบบ"}
+              </h2>
+              <p className="text-xs text-base-content/60">
+                {editingId
+                  ? `กำลังแก้ไขสินค้ารหัส #${editingId}`
+                  : "กรอกข้อมูลและระบุราคาสินค้าเพื่อจัดเก็บในคลัง"}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="card-title text-xl">
-              {editingId ? "แก้ไขสินค้า" : "เพิ่มสินค้าใหม่"}
-            </h2>
-            <p className="text-sm text-base-content/60">
-              {editingId
-                ? "แก้ไขข้อมูลสินค้าในระบบ"
-                : "กรอกข้อมูลเพื่อเพิ่มรายการเข้าสู่ระบบ"}
-            </p>
-          </div>
+
+          <form onSubmit={onSubmit} className="space-y-4">
+            {/* Name Input */}
+            <div className="form-control">
+              <label className="label py-1">
+                <span className="label-text font-medium flex items-center gap-1.5">
+                  <Tag className="size-4 text-primary" />
+                  ชื่อสินค้า <span className="text-error">*</span>
+                </span>
+              </label>
+              <input
+                className="input input-bordered w-full focus:input-primary"
+                type="text"
+                required
+                value={name}
+                onChange={(e) => onNameChange(e.target.value)}
+                placeholder="เช่น คีย์บอร์ดไร้สาย หรือ MacBook Pro"
+              />
+            </div>
+
+            {/* Price Input */}
+            <div className="form-control">
+              <label className="label py-1">
+                <span className="label-text font-medium flex items-center gap-1.5">
+                  <DollarSign className="size-4 text-success" />
+                  ราคา (บาท) <span className="text-error">*</span>
+                </span>
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-bold text-success">
+                  ฿
+                </span>
+                <input
+                  className="input input-bordered w-full pl-8 focus:input-primary"
+                  type="number"
+                  step="any"
+                  min="0"
+                  required
+                  value={price}
+                  onChange={(e) => onPriceChange(e.target.value)}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            {/* Image URL Input */}
+            <div className="form-control">
+              <label className="label py-1">
+                <span className="label-text font-medium flex items-center gap-1.5">
+                  <Image className="size-4 text-accent" />
+                  URL รูปภาพ
+                </span>
+              </label>
+              <input
+                className="input input-bordered w-full focus:input-primary text-sm"
+                type="url"
+                value={image}
+                onChange={(e) => {
+                  setImagePreviewError(false);
+                  onImageChange(e.target.value);
+                }}
+                placeholder="https://images.unsplash.com/..."
+              />
+              {/* Preset Image Buttons */}
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-base-content/50 flex items-center gap-1 mr-1">
+                  <Sparkles className="size-3" /> ตัวอย่าง:
+                </span>
+                {PRESET_IMAGES.map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => {
+                      setImagePreviewError(false);
+                      onImageChange(preset.url);
+                    }}
+                    className="btn btn-xs btn-outline btn-ghost text-xs"
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Description Textarea */}
+            <div className="form-control">
+              <label className="label py-1">
+                <span className="label-text font-medium flex items-center gap-1.5">
+                  <FileText className="size-4 text-base-content/60" />
+                  รายละเอียดสินค้า
+                </span>
+              </label>
+              <textarea
+                className="textarea textarea-bordered w-full focus:textarea-primary text-sm"
+                value={description}
+                onChange={(e) => onPriceChange && onDescriptionChange(e.target.value)}
+                placeholder="ระบุรายละเอียดคุณสมบัติหรือสเปกสินค้า..."
+                rows="3"
+              />
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-4 border-t border-base-200">
+              <button
+                className="btn btn-ghost w-full sm:w-auto"
+                type="button"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
+                <X className="size-4" /> ยกเลิก
+              </button>
+              <button
+                className={`btn ${
+                  editingId ? "btn-warning" : "btn-primary"
+                } w-full sm:w-auto shadow-md`}
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm" />
+                    กำลังบันทึก...
+                  </>
+                ) : editingId ? (
+                  <>
+                    <Pencil className="size-4" /> บันทึกการแก้ไข
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="size-4" /> บันทึกสินค้า
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
-        <form
-          className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2"
-          onSubmit={onSubmit}
-        >
-          <label className="form-control w-full">
-            <span className="label-text mb-2 font-medium">ชื่อสินค้า *</span>
-            <input
-              className="input input-bordered w-full"
-              type="text"
-              required
-              value={name}
-              onChange={(event) => onNameChange(event.target.value)}
-              placeholder="เช่น Gaming keyboard"
-            />
-          </label>
-          <label className="form-control w-full">
-            <span className="label-text mb-2 font-medium">ราคา (บาท) *</span>
-            <input
-              className="input input-bordered w-full"
-              type="number"
-              step="any"
-              min="0"
-              required
-              value={price}
-              onChange={(event) => onPriceChange(event.target.value)}
-              placeholder="เช่น 1500"
-            />
-          </label>
-          <label className="form-control w-full">
-            <span className="label-text mb-2 font-medium">รายละเอียด</span>
-            <textarea
-              className="textarea textarea-bordered w-full"
-              value={description}
-              onChange={(event) => onDescriptionChange(event.target.value)}
-              placeholder="รายละเอียดสินค้าเพิ่มเติม"
-              rows="3"
-            />
-          </label>
-          <label className="form-control w-full">
-            <span className="label-text mb-2 font-medium">URL รูปภาพ</span>
-            <input
-              className="input input-bordered w-full"
-              type="url"
-              value={image}
-              onChange={(event) => onImageChange(event.target.value)}
-              placeholder="https://example.com/product.jpg"
-            />
-          </label>
-          <div className="flex flex-col gap-2 md:col-span-2 md:flex-row md:justify-end">
-            <button
-              className="btn btn-primary w-full md:w-auto"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : editingId ? (
-                <Pencil className="size-4" />
-              ) : (
-                <PlusCircle className="size-4" />
-              )}
-              {isSubmitting
-                ? "กำลังบันทึก..."
-                : editingId
-                  ? "บันทึกการแก้ไข"
-                  : "บันทึกข้อมูล"}
-            </button>
-            <button
-              className="btn btn-ghost w-full md:w-auto"
-              type="button"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              <X className="size-4" /> ยกเลิก
-            </button>
+      </section>
+
+      {/* Live Preview Card (1 Column on large screens) */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-base-content/60">
+            ตัวอย่างการแสดงผลจริง (Live Preview)
+          </span>
+          <span className="badge badge-outline badge-xs text-base-content/50">Preview</span>
+        </div>
+
+        <article className="card overflow-hidden border border-base-300 bg-base-100 shadow-md">
+          <figure className="relative aspect-[16/10] bg-base-200 overflow-hidden">
+            {image && !imagePreviewError ? (
+              <img
+                src={image}
+                alt={name || "ตัวอย่างสินค้า"}
+                onError={() => setImagePreviewError(true)}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="grid h-full w-full place-items-center bg-base-200 text-base-content/30">
+                <div className="flex flex-col items-center gap-1">
+                  <ImageOff className="size-10" />
+                  <span className="text-xs font-medium">ไม่มีรูปภาพ</span>
+                </div>
+              </div>
+            )}
+            <div className="absolute top-2.5 left-2.5">
+              <span className="badge badge-neutral badge-sm font-mono font-semibold shadow-sm">
+                #{editingId || "NEW"}
+              </span>
+            </div>
+            <div className="absolute bottom-2.5 right-2.5">
+              <span className="badge badge-success badge-lg font-bold shadow-md text-white">
+                ฿{price ? Number(price).toLocaleString() : "0"}
+              </span>
+            </div>
+          </figure>
+
+          <div className="card-body gap-2 p-5">
+            <h3 className="truncate text-lg font-bold text-base-content">
+              {name || "ชื่อสินค้าตัวอย่าง"}
+            </h3>
+            <p className="line-clamp-2 min-h-[2.5rem] text-sm text-base-content/70">
+              {description || "รายละเอียดสินค้าจะแสดงที่นี่..."}
+            </p>
+            <div className="card-actions justify-end border-t border-base-200 pt-3">
+              <span className="btn btn-sm btn-ghost btn-disabled text-xs">
+                ปุ่มจัดการจะแสดงในหน้ารายการ
+              </span>
+            </div>
           </div>
-        </form>
-      </div>
-    </section>
+        </article>
+      </section>
+    </div>
   );
 }
 

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import Navbar from "../components/Navbar";
 import ProductForm from "../components/ProductForm";
-import ProductHeader from "../components/ProductHeader";
 import { createProduct } from "../services/productService";
 import { showSuccess, showError } from "../services/alertService";
+import { ArrowLeft, ChevronRight, Home } from "lucide-react";
 
 const AddProductPage = () => {
   const navigate = useNavigate();
@@ -15,8 +16,12 @@ const AddProductPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !price) {
-      showError("กรุณากรอกชื่อสินค้าและราคาให้ครบถ้วน");
+    if (!name.trim()) {
+      showError("กรุณากรอกชื่อสินค้า");
+      return;
+    }
+    if (price === "" || isNaN(Number(price)) || Number(price) < 0) {
+      showError("กรุณากรอกราคาที่ถูกต้องและไม่ติดลบ");
       return;
     }
 
@@ -28,10 +33,10 @@ const AddProductPage = () => {
         description: description.trim(),
         image: image.trim(),
       });
-      await showSuccess("เพิ่มสินค้าเรียบร้อยแล้ว");
+      await showSuccess("เพิ่มสินค้าเรียบร้อยแล้ว", `เพิ่ม "${name.trim()}" สำเร็จ`);
       navigate("/product");
     } catch (error) {
-      showError(error);
+      showError(error, "ไม่สามารถเพิ่มสินค้าได้");
     } finally {
       setIsSubmitting(false);
     }
@@ -42,9 +47,36 @@ const AddProductPage = () => {
   };
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <ProductHeader />
+    <div className="min-h-screen bg-base-200">
+      <Navbar />
+
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+        {/* Navigation Breadcrumb */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="breadcrumbs text-sm">
+            <ul>
+              <li>
+                <Link to="/product" className="gap-1.5 text-base-content/70 hover:text-primary">
+                  <Home className="size-4" />
+                  หน้าแรก
+                </Link>
+              </li>
+              <li className="text-primary font-medium">
+                <ChevronRight className="size-4 text-base-content/40" />
+                เพิ่มสินค้าใหม่
+              </li>
+            </ul>
+          </div>
+          <Link
+            to="/product"
+            className="btn btn-ghost btn-sm gap-1.5 self-start sm:self-auto text-base-content/70 hover:text-base-content"
+          >
+            <ArrowLeft className="size-4" />
+            กลับไปหน้ารายการ
+          </Link>
+        </div>
+
+        {/* Form and Live Preview */}
         <ProductForm
           name={name}
           price={price}
@@ -58,8 +90,8 @@ const AddProductPage = () => {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
-      </div>
-    </main>
+      </main>
+    </div>
   );
 };
 
