@@ -44,8 +44,6 @@ const getProductById = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found!" });
     }
     return res.status(200).json(product);
-
-    return res.status(200).json(product);
   } catch (error) {
     return next(error);
   }
@@ -68,10 +66,10 @@ const updateProduct = async (req, res, next) => {
     }
     const updates = {};
     //ให้แก้ได้บางค่า และทุกค่า
-    if (name != undefined) update.name = name;
-    if (price != undefined) update.price = Number(price);
-    if (description != undefined) update.description = description;
-    if (image != undefined) update.image = image;
+    if (name != undefined) updates.name = name;
+    if (price != undefined) updates.price = Number(price);
+    if (description != undefined) updates.description = description;
+    if (image != undefined) updates.image = image;
 
     await product.update(updates);
     return res.status(200).json(product);

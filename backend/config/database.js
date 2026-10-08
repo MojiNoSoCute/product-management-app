@@ -14,6 +14,19 @@ const sequelize = new Sequelize(
     }
 );
 
+// const databaseURL = process.env.DATABASE_URL_UNPOOLED
+
+// const sequelize = new Sequelize(databaseURL, {
+//     dialect: "postgres",
+//     logging: false,
+//     dialectOptions: {
+//         ssl:{
+//             require: true,
+//             rejectUnauthorized: false,
+//         }
+//     }
+// })
+
 const connectDB = async () => {
     try {
         await sequelize.authenticate();
