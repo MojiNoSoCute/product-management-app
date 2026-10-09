@@ -7,18 +7,27 @@ import { getProduct, updateProduct } from "../services/productService";
 import { showSuccess, showError } from "../services/alertService";
 import { ArrowLeft, ChevronRight, Home } from "lucide-react";
 
+/**
+ * หน้าสำหรับแก้ไขสินค้าตามรหัส ID (Edit Product Page)
+ * ดึง id จาก URL Parameter ผ่าน useParams() และโหลดข้อมูลเดิมมาเติมในฟอร์ม
+ */
 const EditProductPage = () => {
+  // ดึงพารามิเตอร์ :id จาก URL เช่น /product/5/edit -> id = 5
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // State สำหรับเก็บข้อมูลในแบบฟอร์ม
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
+
+  // State ควบคุมการโหลดและการแจ้งเตือน Error
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ฟังก์ชันดึงข้อมูลสินค้าจาก Backend ตาม ID เพื่อนำมาแสดงใน Form
   const fetchProduct = async () => {
     setLoading(true);
     setError("");
@@ -35,6 +44,7 @@ const EditProductPage = () => {
     }
   };
 
+  // โหลดข้อมูลสินค้าเมื่อ Component ถูกเรนเดอร์หรือเมื่อค่า id มีการเปลี่ยนแปลง
   useEffect(() => {
     let ignore = false;
     getProduct(id)
@@ -62,12 +72,17 @@ const EditProductPage = () => {
     };
   }, [id]);
 
+  // ฟังก์ชันบันทึกการแก้ไขข้อมูลสินค้า (Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ตรวจสอบชื่อสินค้า
     if (!name.trim()) {
       showError("กรุณากรอกชื่อสินค้า");
       return;
     }
+
+    // ตรวจสอบราคา
     if (price === "" || isNaN(Number(price)) || Number(price) < 0) {
       showError("กรุณากรอกราคาที่ถูกต้องและไม่ติดลบ");
       return;
@@ -75,6 +90,7 @@ const EditProductPage = () => {
 
     setIsSubmitting(true);
     try {
+      // เรียก API บันทึกการแก้ไข (PUT /api/products/:id)
       await updateProduct(id, {
         name: name.trim(),
         price: Number(price),
@@ -90,6 +106,7 @@ const EditProductPage = () => {
     }
   };
 
+  // ฟังก์ชันกดยกเลิก
   const handleCancel = () => {
     navigate("/product");
   };
@@ -124,6 +141,7 @@ const EditProductPage = () => {
           </Link>
         </div>
 
+        {/* จัดการสถานะโหลดและแสดงแบบฟอร์ม */}
         <PageState loading={loading} error={error} onRetry={fetchProduct}>
           <ProductForm
             editingId={id}

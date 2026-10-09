@@ -1,31 +1,47 @@
+# ==============================================================================
+# Docker Compose Configuration for Product Management Application
+# ประกอบไปด้วย 3 เซอร์วิสหลัก:
+# 1. postgres-db : ฐานข้อมูล PostgreSQL 15 Alpine
+# 2. backend     : Node.js Express API Server
+# 3. frontend    : React + Vite + Tailwind/DaisyUI Web Client
+# ==============================================================================
+
 services:
+  # ----------------------------------------------------------------------------
+  # 1. Service: postgres-db (ฐานข้อมูล PostgreSQL)
+  # ----------------------------------------------------------------------------
   postgres-db:
     image: postgres:15-alpine
     container_name: express_postgres_container
+    # กำหนดค่าผู้ใช้งาน รหัสผ่าน และชื่อฐานข้อมูลเริ่มต้นผ่าน Environment Variables
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      # host port : container port
+      # แมปพอร์ต Host (เช่น 5432) เข้ากับพอร์ตภายในคอนเทนเนอร์ (5432)
       - "${POSTGRES_PORT}:5432"
     volumes:
-      # host disk : container disk bind port
+      # ใช้ Docker Volume ชื่อ pgdata บันทึกข้อมูลให้อยู่ถาวรแม้ปิดคอนเทนเนอร์
       - pgdata:/var/lib/postgresql/data
-    # check healthly services
+    # ตรวจสอบความพร้อมของฐานข้อมูลก่อนให้ Backend เริ่มทำงาน
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 5s       # ตรวจสอบทุกๆ 5 วินาที
+      timeout: 5s        # ให้เวลารอคำตอบไม่เกิน 5 วินาที
+      retries: 10        # พยายามซ้ำได้สูงสุด 10 ครั้ง
+      start_period: 30s  # ให้เวลารอเริ่มต้นก่อนเริ่มตรวจ 30 วินาที
 
+  # ----------------------------------------------------------------------------
+  # 2. Service: backend (Node.js Express API Server)
+  # ----------------------------------------------------------------------------
   backend:
     image: node:22-alpine
     working_dir: /app
     volumes:
-      # host : container
+      # Bind Mount โฟลเดอร์ ./backend จากเครื่อง Host เข้าสู่คอนเทนเนอร์ /app (Hot reload โค้ด)
       - ./backend:/app
+      # ป้องกันไม่ให้ node_modules บนเครื่อง Host ทับกับในคอนเทนเนอร์
       - backend_node_modules:/app/node_modules
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -34,31 +50,41 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-    # check NODE_ENV if then else ปิดด้วย fi         !!! careful this command !!!
+    # รัน npm install แล้วเริ่ม dev (ด้วย nodemon) หรือ start ตาม NODE_ENV
     command: >-
       sh -c 'if [ "$$NODE_ENV" = "development" ]; then npm install && npm run dev; else npm install --omit=dev && npm start; fi'
     ports:
+      # แมปพอร์ต Backend (เช่น 5000:5000)
       - "${BACKEND_PORT}:5000"
-    # wait for services
+    # รอให้ฐานข้อมูล PostgreSQL ตรวจสอบ Healthcheck ผ่านก่อนจึงเริ่มรัน Backend
     depends_on:
       postgres-db:
         condition: service_healthy
 
+  # ----------------------------------------------------------------------------
+  # 3. Service: frontend (React + Vite Client)
+  # ----------------------------------------------------------------------------
   frontend:
     image: node:22-alpine
     working_dir: /app
     volumes:
+      # Bind Mount โฟลเดอร์ ./frontend เพื่อทำ Hot Module Replacement (HMR) ขณะพัฒนา
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
     environment:
-      - VITE_API_URL=${VITE_API_URL}
+      - VITE_API_URL=${VITE_API_URL} # URL สำหรับเรียก API ของ Backend
+    # ติดตั้ง dependencies และรัน Vite Dev Server โดยเปิดรับ traffic จากภายนอกคอนเทนเนอร์ (--host 0.0.0.0)
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --force"
     ports:
+      # แมปพอร์ต Frontend (เช่น 5173:5173)
       - "${FRONTEND_PORT}:5173"
+    # ควรรอให้ Backend เริ่มขึ้นมาก่อน
     depends_on:
       - backend
 
+# กำหนด Named Volumes สำหรับเก็บข้อมูลฐานข้อมูลและ node_modules ภายในคอนเทนเนอร์
 volumes:
   pgdata:
   backend_node_modules:
   frontend_node_modules:
+

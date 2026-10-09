@@ -3,6 +3,9 @@ import { X, Pencil, DollarSign, Tag, Image, FileText, Sparkles, ImageOff } from 
 import { updateProduct } from "../services/productService";
 import { showSuccess, showError } from "../services/alertService";
 
+/**
+ * ภาพตัวอย่างสำเร็จรูปสำหรับกดเลือกใน Modal
+ */
 const PRESET_IMAGES = [
   {
     name: "MacBook",
@@ -18,7 +21,11 @@ const PRESET_IMAGES = [
   },
 ];
 
+/**
+ * Component เนื้อหาภายใน Modal สำหรับจัดการ State และ Submit ข้อมูลสินค้า
+ */
 const EditProductModalContent = ({ product, onClose, onUpdated }) => {
+  // State ข้อมูลสินค้าที่กำลังแก้ไข
   const [name, setName] = useState(product.name || "");
   const [price, setPrice] = useState(product.price ?? "");
   const [description, setDescription] = useState(product.description || "");
@@ -26,12 +33,17 @@ const EditProductModalContent = ({ product, onClose, onUpdated }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  // ฟังก์ชันบันทึกการแก้ไขสินค้า (PUT /api/products/:id)
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ตรวจสอบชื่อสินค้า
     if (!name.trim()) {
       showError("กรุณากรอกชื่อสินค้า");
       return;
     }
+
+    // ตรวจสอบราคาสินค้า
     if (price === "" || isNaN(Number(price)) || Number(price) < 0) {
       showError("กรุณากรอกราคาที่ถูกต้องและไม่ติดลบ");
       return;
@@ -39,6 +51,7 @@ const EditProductModalContent = ({ product, onClose, onUpdated }) => {
 
     setIsSubmitting(true);
     try {
+      // เรียก API บันทึกข้อมูล
       const updated = await updateProduct(product.id, {
         name: name.trim(),
         price: Number(price),
@@ -46,8 +59,8 @@ const EditProductModalContent = ({ product, onClose, onUpdated }) => {
         image: image.trim(),
       });
       await showSuccess("บันทึกการแก้ไขเรียบร้อยแล้ว", `อัปเดต "${name.trim()}" สำเร็จ`);
-      if (onUpdated) onUpdated(updated);
-      onClose();
+      if (onUpdated) onUpdated(updated); // ส่งข้อมูลที่อัปเดตแล้วกลับไปให้หน้าหลัก
+      onClose();                         // ปิดหน้าต่าง Modal
     } catch (err) {
       showError(err, "ไม่สามารถบันทึกการแก้ไขได้");
     } finally {
@@ -58,6 +71,7 @@ const EditProductModalContent = ({ product, onClose, onUpdated }) => {
   return (
     <div className="modal modal-open z-50">
       <div className="modal-box max-w-2xl border border-base-300 p-6 shadow-2xl">
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-base-200 pb-3">
           <div className="flex items-center gap-2.5">
@@ -240,13 +254,18 @@ const EditProductModalContent = ({ product, onClose, onUpdated }) => {
         </form>
       </div>
 
-      {/* Backdrop */}
+      {/* Backdrop: ฉากหลังสีดำโปร่งใส กดแล้วปิด Modal */}
       <div className="modal-backdrop bg-black/60 backdrop-blur-xs" onClick={onClose} />
     </div>
   );
 };
 
+/**
+ * EditProductModal Component (Main Export)
+ * ควบคุมการแสดงผล Modal โดยใช้ key={product.id} เพื่อรีเซ็ต State ฟอร์มใหม่ทุกครั้งที่เปลี่ยนสินค้าที่เลือก
+ */
 const EditProductModal = ({ product, isOpen, onClose, onUpdated }) => {
+  // หากไม่ได้เปิด Modal หรือยังไม่มีข้อมูลสินค้าที่เลือก ไม่ต้องแสดงผล
   if (!isOpen || !product) return null;
 
   return (
@@ -260,3 +279,4 @@ const EditProductModal = ({ product, isOpen, onClose, onUpdated }) => {
 };
 
 export default EditProductModal;
+

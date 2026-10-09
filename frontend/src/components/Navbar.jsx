@@ -2,17 +2,27 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router";
 import { Boxes, Plus, Sun, Moon } from "lucide-react";
 
+/**
+ * Navigation Bar Component
+ * แสดงโลโก้, ชื่อระบบ, ปุ่มสลับธีม (Light/Dark Mode) ที่จำค่าผ่าน localStorage
+ * และปุ่มเพิ่มสินค้าใหม่ (จะซ่อนอัตโนมัติหากอยู่ในหน้า /product/new อยู่แล้ว)
+ */
 const Navbar = () => {
+  // ดึงตำแหน่ง URL ปัจจุบัน
   const location = useLocation();
+
+  // State จัดการธีม โดยอ่านค่าเริ่มต้นจาก localStorage (ถ้าไม่มีจะใช้ธีม "dark")
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("app_theme") || "dark";
   });
 
+  // อัปเดต attribute บนแท็ก <html> และบันทึกลง localStorage เมื่อธีมเปลี่ยน
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("app_theme", theme);
   }, [theme]);
 
+  // สลับธีมระหว่าง dark และ light
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
@@ -20,7 +30,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-40 border-b border-base-300 bg-base-100/80 backdrop-blur-md transition-colors">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        {/* Brand */}
+        {/* โลโก้และชื่อแบรนด์ ProductHub */}
         <Link
           to="/product"
           className="group flex items-center gap-3 transition-transform hover:scale-[1.02]"
@@ -37,9 +47,9 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Action Controls */}
+        {/* ปุ่มควบคุมฝั่งขวา */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Theme Toggle Button */}
+          {/* ปุ่มสลับโหมดสว่าง/โหมดมืด (Theme Toggle Button) */}
           <button
             onClick={toggleTheme}
             className="btn btn-ghost btn-circle btn-sm sm:btn-md"
@@ -53,7 +63,7 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* Add Product Button */}
+          {/* ปุ่มเพิ่มสินค้าใหม่ (แสดงเฉพาะเมื่อไม่ได้อยู่ในหน้าเพิ่มสินค้า) */}
           {location.pathname !== "/product/new" && (
             <Link
               to="/product/new"
@@ -70,3 +80,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

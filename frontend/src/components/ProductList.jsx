@@ -13,9 +13,14 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 
+/**
+ * ImageCard Component: แสดงรูปภาพสินค้า พร้อมระบบ Fallback
+ * หาก URL ผิดพลาด โหลดไม่ขึ้น หรือไม่มี URL จะแสดง Icon รูปภาพว่างแทนอัตโนมัติ
+ */
 const ImageCard = ({ src, alt }) => {
   const [hasError, setHasError] = useState(false);
 
+  // กรณีไม่มี URL รูป หรือรูปภาพโหลดไม่สำเร็จ (Error)
   if (!src || hasError) {
     return (
       <div className="grid h-full w-full place-items-center bg-base-200 text-base-content/30">
@@ -38,16 +43,23 @@ const ImageCard = ({ src, alt }) => {
   );
 };
 
+/**
+ * ProductList Component: แสดงรายการสินค้าทั้งหมด
+ * รองรับการค้นหา (Search), การเรียงลำดับ (Sorting), และสลับมุมมองแบบการ์ด (Grid) หรือตาราง (Table)
+ */
 const ProductList = ({ products, onEdit, onDelete }) => {
+  // State คำค้นหา
   const [searchTerm, setSearchTerm] = useState("");
+  // State รูปแบบการเรียงลำดับ เช่น id-asc, price-desc
   const [sortBy, setSortBy] = useState("id-asc");
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'table'
+  // State มุมมองการแสดงผล: 'grid' (การ์ด) หรือ 'table' (ตาราง)
+  const [viewMode, setViewMode] = useState("grid");
 
-  // Filter and sort products
+  // กรองและเรียงลำดับสินค้าด้วย useMemo เพื่อประสิทธิภาพ (คำนวณใหม่เฉพาะเมื่อ dependencies เปลี่ยน)
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // Search filter
+    // 1. ระบบค้นหา (กรองตามชื่อ, รายละเอียด หรือรหัส ID)
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter(
@@ -58,7 +70,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
       );
     }
 
-    // Sort
+    // 2. ระบบเรียงลำดับ (Sorting)
     result.sort((a, b) => {
       switch (sortBy) {
         case "id-desc":
@@ -80,7 +92,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
     return result;
   }, [products, searchTerm, sortBy]);
 
-  // When no products exist in system
+  // กรณีในระบบยังไม่มีสินค้าเลย (Empty State)
   if (products.length === 0) {
     return (
       <div className="card border-2 border-dashed border-base-300 bg-base-100 shadow-sm">
@@ -103,13 +115,14 @@ const ProductList = ({ products, onEdit, onDelete }) => {
     );
   }
 
+
   return (
     <section className="space-y-4">
-      {/* Search, Filter & Controls Toolbar */}
+      {/* แถบเครื่องมือ: ค้นหา, เรียงลำดับ และสลับมุมมอง (Search & Controls Toolbar) */}
       <div className="card border border-base-300 bg-base-100 shadow-sm">
         <div className="card-body p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            {/* Search Input */}
+            {/* ช่องค้นหาสินค้า (Search Input) */}
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-base-content/40" />
               <input
@@ -119,6 +132,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
                 placeholder="ค้นหาชื่อสินค้า, รายละเอียด หรือรหัส #ID..."
                 className="input input-bordered input-sm sm:input-md w-full pl-9 pr-8"
               />
+              {/* ปุ่มล้างคำค้นหา (Clear button) */}
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
@@ -130,9 +144,9 @@ const ProductList = ({ products, onEdit, onDelete }) => {
               )}
             </div>
 
-            {/* Sort & View Controls */}
+            {/* ส่วนควบคุมการเรียงลำดับและมุมมอง */}
             <div className="flex items-center gap-2">
-              {/* Sort Selector */}
+              {/* Dropdown เลือกรูปแบบการจัดเรียง (Sort Selector) */}
               <div className="relative flex items-center">
                 <ArrowUpDown className="pointer-events-none absolute left-3 size-4 text-base-content/50" />
                 <select
@@ -149,7 +163,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
                 </select>
               </div>
 
-              {/* View Mode Toggle */}
+              {/* ปุ่มสลับมุมมองระหว่าง Grid (การ์ด) กับ Table (ตาราง) */}
               <div className="join border border-base-300">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -175,7 +189,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
             </div>
           </div>
 
-          {/* Search Result Counter */}
+          {/* แถบแสดงจำนวนรายการที่ค้นพบ */}
           <div className="mt-2 flex items-center justify-between text-xs text-base-content/60">
             <span>
               แสดง <b>{filteredProducts.length}</b> จากทั้งหมด {products.length} รายการ
@@ -192,7 +206,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
         </div>
       </div>
 
-      {/* No Search Results */}
+      {/* กรณีค้นหาแล้วไม่พบสินค้าที่ตรงกัน */}
       {filteredProducts.length === 0 && (
         <div className="card border border-base-300 bg-base-100 shadow-sm py-12 text-center">
           <div className="card-body items-center">
@@ -211,7 +225,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
         </div>
       )}
 
-      {/* Grid View */}
+      {/* 1. มุมมองแบบการ์ด (Grid View) */}
       {viewMode === "grid" && filteredProducts.length > 0 && (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((product) => (
@@ -219,6 +233,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
               key={product.id}
               className="group card card-hover-effect overflow-hidden border border-base-300 bg-base-100 shadow-sm hover:border-primary/40"
             >
+
               {/* Product Image */}
               <figure className="relative aspect-[16/10] bg-base-200 overflow-hidden">
                 <ImageCard src={product.image} alt={product.name} />
@@ -274,7 +289,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
         </div>
       )}
 
-      {/* Table View */}
+      {/* 2. มุมมองแบบตาราง (Table View) */}
       {viewMode === "table" && filteredProducts.length > 0 && (
         <div className="overflow-x-auto rounded-2xl border border-base-300 bg-base-100 shadow-sm">
           <table className="table table-zebra table-sm sm:table-md">
@@ -291,9 +306,11 @@ const ProductList = ({ products, onEdit, onDelete }) => {
             <tbody>
               {filteredProducts.map((product) => (
                 <tr key={product.id} className="hover">
+                  {/* รหัสสินค้า */}
                   <td className="text-center font-mono font-medium text-base-content/60">
                     #{product.id}
                   </td>
+                  {/* รูปภาพขนาด Thumbnail */}
                   <td className="text-center">
                     <div className="avatar">
                       <div className="mask mask-squircle size-12 bg-base-200">
@@ -301,18 +318,22 @@ const ProductList = ({ products, onEdit, onDelete }) => {
                       </div>
                     </div>
                   </td>
+                  {/* ชื่อสินค้า */}
                   <td>
                     <div className="font-bold text-base-content">{product.name}</div>
                     <div className="text-xs text-base-content/50 md:hidden line-clamp-1">
                       {product.description || "-"}
                     </div>
                   </td>
+                  {/* รายละเอียดสินค้า */}
                   <td className="hidden md:table-cell max-w-xs truncate text-sm text-base-content/70">
                     {product.description || "-"}
                   </td>
+                  {/* ราคาสินค้า */}
                   <td className="text-right font-bold text-success text-base whitespace-nowrap">
                     ฿{Number(product.price).toLocaleString()}
                   </td>
+                  {/* ปุ่มแก้ไขและลบสินค้า */}
                   <td>
                     <div className="flex items-center justify-center gap-1">
                       <button
@@ -337,6 +358,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
           </table>
         </div>
       )}
+
     </section>
   );
 };

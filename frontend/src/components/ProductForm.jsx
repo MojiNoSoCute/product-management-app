@@ -11,7 +11,9 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// Preset sample images for quick testing
+/**
+ * รูปภาพตัวอย่างสำเร็จรูป (Preset Images) สำหรับกดเลือกทดสอบกรอกข้อมูลได้อย่างรวดเร็ว
+ */
 const PRESET_IMAGES = [
   {
     name: "MacBook",
@@ -35,28 +37,33 @@ const PRESET_IMAGES = [
   },
 ];
 
+/**
+ * ProductForm Component
+ * แบบฟอร์มเพิ่ม/แก้ไขสินค้า พร้อมช่องกรอกข้อมูลและหน้าจอแสดงตัวอย่างผลลัพธ์แบบเรียลไทม์ (Live Preview)
+ */
 function ProductForm({
-  editingId,
-  name,
-  price,
-  description,
-  image,
-  isSubmitting,
-  onNameChange,
-  onPriceChange,
-  onDescriptionChange,
-  onImageChange,
-  onSubmit,
-  onCancel,
+  editingId,           // รหัสสินค้า (ถ้ามีค่า = กำลังแก้ไข, ถ้าไม่มี = กำลังเพิ่มใหม่)
+  name,                // ชื่อสินค้า
+  price,               // ราคาสินค้า
+  description,         // รายละเอียด
+  image,               // URL รูปภาพ
+  isSubmitting,        // สถานะกำลังบันทึก (ปิดปุ่มเพื่อป้องกันกดซ้ำ)
+  onNameChange,        // ฟังก์ชันเปลี่ยนชื่อ
+  onPriceChange,       // ฟังก์ชันเปลี่ยนราคา
+  onDescriptionChange, // ฟังก์ชันเปลี่ยนรายละเอียด
+  onImageChange,       // ฟังก์ชันเปลี่ยนรูป
+  onSubmit,            // ฟังก์ชัน Submit
+  onCancel,            // ฟังก์ชันยกเลิก
 }) {
+  // State ตรวจจับข้อผิดพลาดในการโหลดรูปฝั่ง Live Preview
   const [imagePreviewError, setImagePreviewError] = useState(false);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      {/* Form Card (2 Columns on large screens) */}
+      {/* ฝั่งซ้าย: ส่วนแบบฟอร์มกรอกข้อมูล (กว้าง 2 คอลัมน์บนจอใหญ่) */}
       <section className="card border border-base-300 bg-base-100 shadow-sm lg:col-span-2">
         <div className="card-body p-5 sm:p-7">
-          {/* Header */}
+          {/* ส่วนหัวของฟอร์ม */}
           <div className="mb-4 flex items-center gap-3 border-b border-base-200 pb-4">
             <div
               className={`grid size-12 place-items-center rounded-2xl ${
@@ -78,7 +85,7 @@ function ProductForm({
           </div>
 
           <form onSubmit={onSubmit} className="space-y-4">
-            {/* Name Input */}
+            {/* 1. ช่องกรอกชื่อสินค้า */}
             <div className="form-control">
               <label className="label py-1">
                 <span className="label-text font-medium flex items-center gap-1.5">
@@ -96,7 +103,7 @@ function ProductForm({
               />
             </div>
 
-            {/* Price Input */}
+            {/* 2. ช่องกรอกราคาสินค้า */}
             <div className="form-control">
               <label className="label py-1">
                 <span className="label-text font-medium flex items-center gap-1.5">
@@ -121,7 +128,7 @@ function ProductForm({
               </div>
             </div>
 
-            {/* Image URL Input */}
+            {/* 3. ช่องกรอก URL รูปภาพ */}
             <div className="form-control">
               <label className="label py-1">
                 <span className="label-text font-medium flex items-center gap-1.5">
@@ -139,7 +146,7 @@ function ProductForm({
                 }}
                 placeholder="https://images.unsplash.com/..."
               />
-              {/* Preset Image Buttons */}
+              {/* ปุ่มเลือกภาพตัวอย่างสำเร็จรูป (Preset Buttons) */}
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <span className="text-xs text-base-content/50 flex items-center gap-1 mr-1">
                   <Sparkles className="size-3" /> ตัวอย่าง:
@@ -160,7 +167,7 @@ function ProductForm({
               </div>
             </div>
 
-            {/* Description Textarea */}
+            {/* 4. ช่องกรอกรายละเอียดสินค้า */}
             <div className="form-control">
               <label className="label py-1">
                 <span className="label-text font-medium flex items-center gap-1.5">
@@ -177,7 +184,7 @@ function ProductForm({
               />
             </div>
 
-            {/* Form Actions */}
+            {/* 5. ปุ่มแอ็กชันของฟอร์ม (ยกเลิก และ บันทึก) */}
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-4 border-t border-base-200">
               <button
                 className="btn btn-ghost w-full sm:w-auto"
@@ -214,7 +221,7 @@ function ProductForm({
         </div>
       </section>
 
-      {/* Live Preview Card (1 Column on large screens) */}
+      {/* ฝั่งขวา: การ์ดแสดงผลลัพธ์ตัวอย่างแบบเรียลไทม์ (Live Preview) */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wider text-base-content/60">
@@ -224,6 +231,7 @@ function ProductForm({
         </div>
 
         <article className="card overflow-hidden border border-base-300 bg-base-100 shadow-md">
+          {/* รูปภาพพรีวิว */}
           <figure className="relative aspect-[16/10] bg-base-200 overflow-hidden">
             {image && !imagePreviewError ? (
               <img
@@ -252,6 +260,7 @@ function ProductForm({
             </div>
           </figure>
 
+          {/* ข้อความและรายละเอียดพรีวิว */}
           <div className="card-body gap-2 p-5">
             <h3 className="truncate text-lg font-bold text-base-content">
               {name || "ชื่อสินค้าตัวอย่าง"}
@@ -272,3 +281,4 @@ function ProductForm({
 }
 
 export default ProductForm;
+

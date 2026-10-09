@@ -1,13 +1,22 @@
 import { Package, TrendingUp, DollarSign, Sparkles } from "lucide-react";
 
+/**
+ * ส่วนหัวของหน้าสินค้า (Product Header Component)
+ * แสดง Hero Banner ต้อนรับ และการ์ดสรุปสถิติมูลค่าสินค้าแบบเรียลไทม์
+ */
 const ProductHeader = ({ products = [] }) => {
+  // คำนวณจำนวนสินค้าทั้งหมด
   const totalCount = products.length;
+
+  // คำนวณมูลค่าสินค้ารวมทั้งหมดในคลัง (นำราคาทุกชิ้นมารวมกัน)
   const totalValue = products.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+
+  // คำนวณราคาเฉลี่ยต่อชิ้น
   const avgPrice = totalCount > 0 ? Math.round(totalValue / totalCount) : 0;
 
   return (
     <header className="space-y-4">
-      {/* Banner */}
+      {/* ส่วน Banner หลักพร้อมเอฟเฟกต์ Gradient */}
       <div className="hero-gradient relative overflow-hidden rounded-2xl p-6 sm:p-8 text-white shadow-xl">
         <div className="absolute -right-12 -top-12 size-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="absolute -left-12 -bottom-12 size-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
@@ -26,9 +35,10 @@ const ProductHeader = ({ products = [] }) => {
         </div>
       </div>
 
-      {/* Stats Cards (Only shown if products prop is provided and has items) */}
+      {/* แถบการ์ดสรุปสถิติ (Stats Cards) - จะแสดงเมื่อมีสินค้าในระบบอย่างน้อย 1 รายการ */}
       {products.length > 0 && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* การ์ด 1: จำนวนสินค้าทั้งหมด */}
           <div className="card border border-base-300 bg-base-100 shadow-sm transition-all hover:shadow-md">
             <div className="card-body p-4 flex flex-row items-center gap-4">
               <div className="grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
@@ -43,6 +53,7 @@ const ProductHeader = ({ products = [] }) => {
             </div>
           </div>
 
+          {/* การ์ด 2: มูลค่าสินค้ารวมทั้งหมด */}
           <div className="card border border-base-300 bg-base-100 shadow-sm transition-all hover:shadow-md">
             <div className="card-body p-4 flex flex-row items-center gap-4">
               <div className="grid size-12 place-items-center rounded-xl bg-success/10 text-success">
@@ -57,6 +68,7 @@ const ProductHeader = ({ products = [] }) => {
             </div>
           </div>
 
+          {/* การ์ด 3: ราคาเฉลี่ยต่อรายการ */}
           <div className="card border border-base-300 bg-base-100 shadow-sm transition-all hover:shadow-md">
             <div className="card-body p-4 flex flex-row items-center gap-4">
               <div className="grid size-12 place-items-center rounded-xl bg-accent/10 text-accent">
@@ -77,3 +89,4 @@ const ProductHeader = ({ products = [] }) => {
 };
 
 export default ProductHeader;
+

@@ -1,4 +1,12 @@
+/**
+ * PageState Component (Wrapper สำหรับจัดการ State ของหน้าเว็บ)
+ * ทำหน้าที่สลับหน้าจอตามสถานะ:
+ * 1. ถ้า loading = true -> แสดง Spinner กำลังโหลดข้อมูล
+ * 2. ถ้า error มีค่า -> แสดงกล่องข้อความแจ้งเตือน Error พร้อมปุ่ม 'ลองใหม่' (onRetry)
+ * 3. ถ้าปกติ -> แสดง children (เนื้อหาข้างในตามปกติ)
+ */
 const PageState = ({ loading, error, onRetry, children }) => {
+  // สถานะ 1: กำลังโหลดข้อมูล
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -8,6 +16,7 @@ const PageState = ({ loading, error, onRetry, children }) => {
     );
   }
 
+  // สถานะ 2: เกิดข้อผิดพลาด
   if (error) {
     return (
       <div className="alert alert-error shadow-lg">
@@ -34,7 +43,9 @@ const PageState = ({ loading, error, onRetry, children }) => {
     );
   }
 
+  // สถานะ 3: โหลดข้อมูลสำเร็จ แสดงเนื้อหาภายใน
   return children || null;
 };
 
 export default PageState;
+
